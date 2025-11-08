@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prime 8 - آموزش اعداد اول</title>
+<link rel="manifest" href="manifest.json">
+
+<style>
+body {
+  direction: rtl;
+  margin: 0;
+  padding: 0;
+  color: #ffffff;
+  background-color: #000000;
+  font-family: sans-serif;
+}
+.container {
+  max-width: 900px;
+  margin: auto;
+  padding: 20px;
+}
+h2 {
+  text-align: center;
+  color: #fff;
+  font-size: 32px;
+  margin-bottom: 25px;
+  text-shadow: 0 0 10px #7c4dff, 0 0 20px #00e5ff;
+  font-weight: 800;
+}
+.box {
+  background: rgba(20, 20, 20, 0.8);
+  border: 1px solid #00e5ff;
+  border-radius: 16px;
+  box-shadow: 0 0 25px rgba(0,229,255,0.6);
+  padding: 20px;
+  margin-bottom: 25px;
+  transition: 0.4s;
+  font-weight: 600;
+}
+.box:hover {
+  transform: scale(1.02);
+  box-shadow: 0 0 35px #7c4dff, 0 0 25px #00e5ff;
+}
+h3 {
+  color: #ffffff;
+  border-bottom: 1px solid rgba(255,255,255,0.3);
+  padding-bottom: 8px;
+  margin-bottom: 15px;
+  font-weight: 800;
+}
+input {
+  background: rgba(255,255,255,0.1);
+  color: #ffffff;
+  border: 1px solid #00e5ff;
+  border-radius: 8px;
+  padding: 8px 10px;
+  outline: none;
+  font-weight: 600;
+}
+button {
+  background: linear-gradient(90deg, #7c4dff, #00e5ff);
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 25px #7c4dff, 0 0 40px #00e5ff;
+}
+.grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+.cell {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  font-size: 14px;
+  background: rgba(255,255,255,0.08);
+  transition: 0.3s;
+}
+.cell.prime {
+  background: linear-gradient(135deg, #00e5ff, #7c4dff);
+  box-shadow: 0 0 15px #00e5ff;
+}
+.cell.composite {
+  background: linear-gradient(135deg, #ff4081, #7c4dff);
+  box-shadow: 0 0 12px #ff80ab;
+}
+#checkResult, .result-msg {
+  margin-top: 10px;
+  font-weight: 700;
+  color: #fff;
+}
+.footer {
+  text-align: center;
+  margin-top: 40px;
+  color: #ffffff;
+  font-weight: 800;
+  text-shadow: 0 0 15px #00e5ff;
+  font-size: 18px;
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+  <h2>Prime 8 - آموزش اعداد اول</h2>
+
+  <div class="box">
+    <h3>بررسی عدد اول</h3>
+    <input id="numInput" type="number" placeholder="مثلاً 97">
+    <button onclick="checkNum()">بررسی</button>
+    <div id="checkResult"></div>
+  </div>
+
+  <div class="box">
+    <h3>غربال اراتوستن (نمایش تصویری)</h3>
+    <input id="sieveN" type="number" value="50">
+    <button onclick="animateSieve()">نمایش</button>
+    <div id="sieveArea"></div>
+  </div>
+
+  <div class="box">
+    <h3>آزمون اعداد اول</h3>
+    <button onclick="startQuiz()">شروع آزمون</button>
+    <div id="quizArea"></div>
+  </div>
+
+  <div class="footer">
+    © 2025 Prime 8 — آموزش اعداد اول پایه هشتم
+  </div>
+</div>
+
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('service-worker.js');
+}
+
+function isPrime(n) {
+  if (n <= 1) return false;
+  if (n <= 3) return true;
+  if (n % 2 === 0) return false;
+  for (let i = 3; i <= Math.sqrt(n); i += 2)
+    if (n % i === 0) return false;
+  return true;
+}
+
+function checkNum() {
+  const n = parseInt(document.getElementById('numInput').value);
+  const res = document.getElementById('checkResult');
+  if (isNaN(n)) { res.innerHTML = "لطفاً یک عدد وارد کنید."; return; }
+  if (isPrime(n))
+    res.innerHTML = `<div class='result-msg'>عدد ${n} اول است ✅</div>`;
+  else
+    res.innerHTML = `<div class='result-msg'>عدد ${n} اول نیست ❌</div>`;
+}
+
+async function animateSieve() {
+  const n = parseInt(document.getElementById('sieveN').value);
+  const area = document.getElementById('sieveArea');
+  area.innerHTML = '';
+  const cells = [];
+  const grid = document.createElement('div');
+  grid.className = 'grid';
+  for (let i = 2; i <= n; i++) {
+    const c = document.createElement('div');
+    c.className = 'cell';
+    c.textContent = i;
+    grid.appendChild(c);
+    cells[i] = c;
+  }
+  area.appendChild(grid);
+
+  for (let p = 2; p * p <= n; p++) {
+    if (!cells[p].classList.contains('composite')) {
+      cells[p].classList.add('prime');
+      await new Promise(r => setTimeout(r, 300));
+      for (let m = p * p; m <= n; m += p) {
+        cells[m].classList.add('composite');
+        await new Promise(r => setTimeout(r, 80));
+      }
+    }
+  }
+  for (let i = 2; i <= n; i++)
+    if (!cells[i].classList.contains('composite'))
+      cells[i].classList.add('prime');
+}
+
+function startQuiz() {
+  const quizArea = document.getElementById('quizArea');
+  quizArea.innerHTML = '';
+  const questions = [];
+  for (let i = 0; i < 5; i++) {
+    const n = Math.floor(Math.random() * 90) + 10;
+    const correct = isPrime(n);
+    questions.push({ n, correct });
+  }
+
+  let idx = 0, score = 0;
+  showQuestion();
+
+  function showQuestion() {
+    if (idx >= questions.length) {
+      quizArea.innerHTML = `<div>آزمون تمام شد! امتیاز شما: <b>${score}/${questions.length}</b></div>`;
+      return;
+    }
+    const q = questions[idx];
+    quizArea.innerHTML = `<div>سؤال ${idx+1}: آیا عدد ${q.n} اول است؟<br>
+    <button onclick="answer(true)">بله</button>
+    <button onclick="answer(false)">خیر</button></div>`;
+  }
+
+  window.answer = function(ans) {
+    if (ans === questions[idx].correct) score++;
+    idx++; showQuestion();
+  }
+}
+</script>
+</body>
+</html>
